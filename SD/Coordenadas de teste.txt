@@ -1,0 +1,3 @@
+-23.20544	-46.79821 //Assistencia tecnica Hard User
+-23.20975	-46.80078 //Minha casa
+fim

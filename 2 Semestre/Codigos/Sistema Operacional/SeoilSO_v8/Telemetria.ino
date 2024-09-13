@@ -1,0 +1,127 @@
+void Telemetria(){
+  calcular_eixos_giroscopio();
+  
+  double Temperatura = bmp.readTemperature();
+  double pressao = bmp.readPressure();
+
+  if(isnan(Temperatura)){
+    Temperatura = 0;  
+  }
+  if(isnan(pressao)){
+    pressao = 0;  
+  }
+  
+  double bateria = (((analogRead(A0) * 0.0082)-6)/2)*100;
+  String mensagem;
+  
+  for(int x = 0; x <= 3; x++){
+////    while(All_sat[1] == -999 && All_sat[2] == -999){
+//      GPS_all_Data();
+    }
+
+
+  SD.remove("Send.txt");
+  mensagem += "{\"equipe\": 7, \"bateria\": " + String(bateria) + ",\"temperatura\": " + String(Temperatura) +  "," +  "\"pressao\": " + String(pressao) + ","  ;
+  mensagem += "\"giroscopio\": [" + String(ALL_Gyro[0]) + "," + String(ALL_Gyro[1]) + "," + String(ALL_Gyro[2]) + "],";
+  mensagem += "\"acelerometro\": [" + String(ALL_Gyro[3]) + "," + String(ALL_Gyro[4]) + "," + String(ALL_Gyro[5]) + "],";
+  mensagem += "\"payload\": { \"data\": [" + String(All_sat[3]) + "," + String(All_sat[4]) + "," + String(All_sat[5]) + "],";
+  mensagem += "\"hora\":[" +  String(All_sat[6]) + "," +String(All_sat[7])  + "]," ;
+  mensagem += "\"pos_geografica\": [" +  String(All_sat[0]) + "," + String(All_sat[1])  + "]," ;
+
+  mensagem += "\"imgs\": [";
+  for(int t = 0; t <= 4; t++){
+    String leroleoarquivoT = LerOleoArquivo(t);
+
+    if(leroleoarquivoT != "fim"){
+      mensagem += "\"Img\": " + leroleoarquivoT + ",";
+      mensagem += "\"dado\": \"" + PegarDadosImagem(leroleoarquivoT.toInt()) + "\",";
+    }
+    else{
+      t = 5;
+    }
+//    if(t < 4){
+//      mensagem += ",";
+//    }
+
+  }
+  mensagem += "]}}"; 
+  Serial.println("");    
+  Serial.println(mensagem); 
+  Saveln("Send",mensagem);  
+  Saveln("Historico_telemetria",mensagem);
+  e32ttl100.sendMessage(mensagem);
+
+
+  if (vezes >= 3){
+    SD.remove("telemetria.txt");
+    vezes = 0;
+  }
+  Save("telemetria","<tr>");
+  
+  Save("telemetria","<td>");
+  Save("telemetria",String(All_sat[3]));
+  Save("telemetria"," ");
+  Save("telemetria",String(All_sat[4]));
+  Save("telemetria"," ");
+  Save("telemetria",String(All_sat[5]));
+  Save("telemetria","</td>");
+  
+  Save("telemetria","<td>");
+  Save("telemetria",String(All_sat[6]));
+  Save("telemetria"," ");
+  Save("telemetria",String(All_sat[7]));
+  Save("telemetria","</td>");
+  
+  Save("telemetria","<td>");
+  Save("telemetria",String(All_sat[1]));
+  Save("telemetria"," ");
+  Save("telemetria",String(All_sat[2]));  
+  Save("telemetria","</td>");
+  
+  Save("telemetria","<td>");
+  Save("telemetria",String(Temperatura));
+  Save("telemetria","</td>");
+  Save("telemetria","<td>");
+  Save("telemetria",String(pressao));
+  Save("telemetria","</td>");
+  Save("telemetria","<td>");
+  Save("telemetria",String(bateria));
+  Save("telemetria","</td>");
+  
+  Save("telemetria","<td>");
+  Save("telemetria",String(ALL_Gyro[0]));
+  Save("telemetria"," ");
+  Save("telemetria",String(ALL_Gyro[1]));
+  Save("telemetria"," ");
+  Save("telemetria",String(ALL_Gyro[2]));
+  Save("telemetria"," ");
+  Save("telemetria",String(ALL_Gyro[3]));
+  Save("telemetria"," ");
+  Save("telemetria",String(ALL_Gyro[4]));
+  Save("telemetria"," ");
+  Save("telemetria",String(ALL_Gyro[5]));
+  Save("telemetria","</td>");
+    
+  Save("telemetria","<td>");
+  Save("telemetria","{");
+
+  for(int t = 0; t <= 4; t++){
+    String leroleoarquivoT = LerOleoArquivo(t);
+    if(leroleoarquivoT != "fim"){
+      Save("telemetria","imagem ");
+      Save("telemetria",leroleoarquivoT);
+      Save("telemetria",": ");      
+      Save("telemetria","\t");
+      Save("telemetria",PegarDadosImagem(leroleoarquivoT.toInt()));
+    }
+    else{
+      t = 5;
+    }
+    Serial.println(t);
+  }
+  Save("telemetria","}");  
+  Saveln("telemetria","</td>");
+  vezes++;
+  
+
+}
